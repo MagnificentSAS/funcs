@@ -80,6 +80,16 @@ public:
     TDiv(std::shared_ptr<TBaseFunction> lhs, std::shared_ptr<TBaseFunction> rhs);
 };
 
+// Функция-определитель: выбор базовой функции по строке и типу параметра.
+namespace funcs_detail {
+
+std::shared_ptr<TBaseFunction> SelectBaseFunction(const std::string& type);
+std::shared_ptr<TBaseFunction> SelectBaseFunction(const std::string& type, double parameter);
+std::shared_ptr<TBaseFunction> SelectBaseFunction(const std::string& type,
+                                                  const std::vector<double>& parameters);
+
+}  // namespace funcs_detail
+
 // Клиентская обёртка над любой базовой функцией или выражением.
 class TFunction {
 public:

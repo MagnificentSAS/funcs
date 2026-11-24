@@ -184,6 +184,64 @@ TDiv::TDiv(std::shared_ptr<TBaseFunction> lhs, std::shared_ptr<TBaseFunction> rh
                      WrapIfNeeded(rhs, !IsBasicNonPolynomial(rhs));
           }) {}
 
+// --- Функция-определитель ----------------------------------------------------
+
+namespace funcs_detail {
+
+namespace {
+
+[[noreturn]] void ThrowUnknownType(const std::string& type) {
+    throw std::logic_error("Unknown function type: " + type);
+}
+
+}  // namespace
+
+std::shared_ptr<TBaseFunction> SelectBaseFunction(const std::string& type) {
+    if (type == "ident") {
+        return std::make_shared<TIdentity>();
+    }
+    if (type == "exp") {
+        return std::make_shared<TExp>();
+    }
+    if (type == "const" || type == "power") {
+        throw std::logic_error("Function type '" + type + "' requires a numeric parameter");
+    }
+    if (type == "polynomial") {
+        throw std::logic_error("Function type 'polynomial' requires a coefficient vector");
+    }
+    ThrowUnknownType(type);
+}
+
+std::shared_ptr<TBaseFunction> SelectBaseFunction(const std::string& type, double parameter) {
+    if (type == "const") {
+        return std::make_shared<TConstant>(parameter);
+    }
+    if (type == "power") {
+        return std::make_shared<TPower>(parameter);
+    }
+    if (type == "ident" || type == "exp") {
+        throw std::logic_error("Function type '" + type + "' does not take a parameter");
+    }
+    if (type == "polynomial") {
+        throw std::logic_error("Function type 'polynomial' requires a coefficient vector");
+    }
+    ThrowUnknownType(type);
+}
+
+std::shared_ptr<TBaseFunction> SelectBaseFunction(const std::string& type,
+                                                   const std::vector<double>& parameters) {
+    if (type == "polynomial") {
+        return std::make_shared<TPolynomial>(parameters);
+    }
+    if (type == "ident" || type == "exp" || type == "const" || type == "power") {
+        throw std::logic_error("Function type '" + type +
+                               "' does not take a coefficient vector");
+    }
+    ThrowUnknownType(type);
+}
+
+}  // namespace funcs_detail
+
 // --- Клиентская обёртка ------------------------------------------------------
 
 TFunction::TFunction(std::shared_ptr<TBaseFunction> impl) : impl_(std::move(impl)) {

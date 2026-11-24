@@ -5,9 +5,21 @@ GTEST_LIBS ?= -lgtest -lgtest_main -lpthread
 BUILD_DIR ?= build
 TEST_BIN := $(BUILD_DIR)/tests
 TEST_SRCS := $(wildcard test/*.cpp)
-SOURCES := src/base_funcs.cpp
+SOURCES := src/base_funcs.cpp src/factory.cpp
 
-.PHONY: test clean
+LIB := libfuncs.a
+LIB_OBJECTS := $(SOURCES:.cpp=.o)
+
+.PHONY: test lib clean
+
+lib: $(LIB)
+
+$(LIB): $(LIB_OBJECTS)
+	ar rcs $@ $^
+	rm -f $(LIB_OBJECTS)
+
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 test:
 	@rm -rf $(BUILD_DIR)
@@ -18,3 +30,4 @@ test:
 
 clean:
 	rm -rf $(BUILD_DIR)
+	rm -f $(LIB) $(LIB_OBJECTS)
